@@ -1,16 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
 using COM3D2.Lilly.Plugin.Utill;
+using COM3D2API;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace COM3D2.MaidAnmLoop.Plugin
 {
-    [BepInPlugin("COM3D2.PhotoModeAutoLoop.Plugin", "COM3D2.PhotoModeAutoLoop.Plugin", "21.6.05")]// 버전 규칙 잇음. 반드시 2~4개의 숫자구성으로 해야함. 미준수시 못읽어들임
+    [BepInPlugin("COM3D2.MaidAnmLoop.Plugin", "COM3D2.MaidAnmLoop.Plugin", "21.6.05")]// 버전 규칙 잇음. 반드시 2~4개의 숫자구성으로 해야함. 미준수시 못읽어들임
     [BepInProcess("COM3D2x64.exe")]
     public class MaidAnmLoop : BaseUnityPlugin, interfaceUnity
     {
@@ -24,16 +28,26 @@ namespace COM3D2.MaidAnmLoop.Plugin
 
         string[] wrapModes;
 
+        public static byte[] ExtractResource(Bitmap image)
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {                
+                image.Save(ms, ImageFormat.Png);
+                return ms.ToArray(); 
+            }
+        }
+
         public void Awake()
         {
             wrapModes = Enum.GetNames(typeof(WrapMode));
             ConfigEntryUtill.init(Config);
             configEntryUtill = ConfigEntryUtill.Create(
-                "PhotoModeAutoLoop"
+                "MaidAnmLoop"
             );
             configEntryUtillScene = ConfigEntryUtill.Create(
-                "PhotoModeAutoLoop"
+                "MaidAnmLoop"
             );
+            SystemShortcutAPI.AddButton("Lilly Plugin", new Action(delegate() { isOnGUI = !isOnGUI; }), "Lilly Plugin", ExtractResource(Properties.Resources.AnmLoop));
         }
 
         public void OnEnable()
@@ -68,7 +82,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
         public void Update()
         {
             // maid.GetAnimation().isPlaying 
-            if (isRepeat)
+            if (isOn && isRepeat)
             {
                 Apply();
             }
@@ -79,21 +93,29 @@ namespace COM3D2.MaidAnmLoop.Plugin
         {
             foreach (var item in GameMain.Instance.CharacterMgr.GetStockMaidList())
             {
-                item.GetAnimation().wrapMode = wrapMode;
+                if (item)
+                {
+                    item.GetAnimation().wrapMode = wrapMode;
+                }
             }
         }
 
         #region OnGUI
 
-        private Rect windowRect = new Rect(windowSpace, windowSpace, 400f, 400f);
+        private Rect windowRect = new Rect(windowSpace, windowSpace, 200f, 400f);
         private int windowId = new System.Random().Next();
         private const float windowSpace = 40.0f;
+        private bool isOnGUI;
 
         public void OnGUI()
         {
+            if (!isOnGUI)
+            {
+                return;
+            }
             windowRect.x = Mathf.Clamp(windowRect.x, -windowRect.width + windowSpace, Screen.width - windowSpace);
             windowRect.y = Mathf.Clamp(windowRect.y, -windowRect.height + windowSpace, Screen.height - windowSpace);
-            windowRect = GUILayout.Window(windowId, windowRect, WindowFunction, "PhotoModeAutoLoop" + windowId);
+            windowRect = GUILayout.Window(windowId, windowRect, WindowFunction, "MaidAnmLoop" );
         }
 
         #endregion
@@ -101,6 +123,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
 
         private Vector2 scrollPosition;
         private int selected;
+        private int selectedf;
 
         public void WindowFunction(int id)
         {
@@ -108,15 +131,19 @@ namespace COM3D2.MaidAnmLoop.Plugin
             scrollPosition = GUILayout.BeginScrollView(scrollPosition);
 
             GUILayout.Label(scene_name);
-            if (GUILayout.Button("Apply" + isOn)) { Apply(); configEntryUtillScene[scene_name, false] = isOn = !isOn; }
+            if (GUILayout.Button("Apply " + isOn)) { Apply(); configEntryUtillScene[scene_name, false] = isOn = !isOn; }
             if (GUILayout.Button("Apply Repeat" + " , " + isRepeat)) isRepeat = !isRepeat;
 
             GUILayout.Label("Mode");
             selected = GUILayout.SelectionGrid(selected, wrapModes, 2);
             if (GUI.changed)
             {
-                wrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapModes[selected]);
-                Apply();
+                if (selectedf != selected)
+                {
+                    wrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapModes[selected]);
+                    Apply();
+                    selectedf = selected;
+                }
             }
 
             GUILayout.Label("Auto Apply Scene");
