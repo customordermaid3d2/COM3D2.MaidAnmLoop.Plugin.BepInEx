@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace COM3D2.Lilly.Plugin.Utill
 {
@@ -54,6 +55,13 @@ namespace COM3D2.Lilly.Plugin.Utill
 
         public static ConfigEntryUtill Create()
         {
+
+            if (customFile == null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
+
             if (!SectionList.ContainsKey(sectionMain))
                 return new ConfigEntryUtill();
             else
@@ -62,6 +70,11 @@ namespace COM3D2.Lilly.Plugin.Utill
 
         public static ConfigEntryUtill Create(string section)
         {
+            if (customFile == null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
             //MyLog.LogDebug("ConfigEntryUtill.Create", section);
             if (!SectionList.ContainsKey(section))
                 return new ConfigEntryUtill(section);
@@ -70,6 +83,11 @@ namespace COM3D2.Lilly.Plugin.Utill
         }
         public static ConfigEntryUtill Create(string section, params string[] keys)
         {
+            if (customFile == null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
             //MyLog.LogDebug("ConfigEntryUtill.Create", section, keys.Length);
             if (!SectionList.ContainsKey(section))
                 return new ConfigEntryUtill(section, keys);
@@ -198,6 +216,12 @@ namespace COM3D2.Lilly.Plugin.Utill
 
         private static readonly string sectionMain = "ConfigEntryUtill";
         private readonly string section;
+        private T defaultValue;
+
+        internal static void init(ConfigFile customFile)
+        {
+            ConfigEntryUtill<T>.customFile = customFile;
+        }
 
         private ConfigEntryUtill() : base()
         {
@@ -205,10 +229,11 @@ namespace COM3D2.Lilly.Plugin.Utill
             SectionList.Add(sectionMain, this);
         }
 
-        private ConfigEntryUtill(string section) : base()
+        private ConfigEntryUtill(string section, T defaultValue) : base()
         {
             //MyLog.LogDebug("ConfigEntryUtill.ctor", section);
             this.section = section;
+            this.defaultValue = defaultValue;
             SectionList.Add(section, this);
         }
 
@@ -216,28 +241,44 @@ namespace COM3D2.Lilly.Plugin.Utill
         {
             //MyLog.LogDebug("ConfigEntryUtill.ctor", section, keys.Length);
             this.section = section;
+            this.defaultValue = defaultValue;
             SectionList.Add(section, this);
             Add(keys.ToList(), defaultValue);
         }
 
         public static ConfigEntryUtill<T> Create()
         {
+            if (customFile==null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
             if (!SectionList.ContainsKey(sectionMain))
                 return new ConfigEntryUtill<T>();
             else
                 return SectionList[sectionMain];
         }
 
-        public static ConfigEntryUtill<T> Create(string section)
+        public static ConfigEntryUtill<T> Create(string section, T defaultValue)
         {
+            if (customFile == null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
             //MyLog.LogDebug("ConfigEntryUtill.Create", section);
             if (!SectionList.ContainsKey(section))
-                return new ConfigEntryUtill<T>(section);
+                return new ConfigEntryUtill<T>(section, defaultValue);
             else
                 return SectionList[section];
         }
-        public static ConfigEntryUtill<T> Create(string section, T defaultValue , params string[] keys)
+        public static ConfigEntryUtill<T> Create(string section, T defaultValue, params string[] keys)
         {
+            if (customFile == null)
+            {
+                Debug.LogError("customFile is null!");
+                return null;
+            }
             //MyLog.LogDebug("ConfigEntryUtill.Create", section, keys.Length);
             if (!SectionList.ContainsKey(section))
                 return new ConfigEntryUtill<T>(section, defaultValue, keys);
@@ -248,18 +289,36 @@ namespace COM3D2.Lilly.Plugin.Utill
             }
         }
 
-        public T this[string section, string key, T defaultValue ]
+        public T this[string section, string key, T defaultValue]
         {
-            get => Create(section)[key, defaultValue];
-            set => Create(section)[key, defaultValue] = value;
+            get => Create(section, defaultValue)[key, defaultValue];
+            set => Create(section, defaultValue)[key, defaultValue] = value;
         }
 
-        internal static void init(ConfigFile customFile)
+        public T this[string section, string key]
         {
-            ConfigEntryUtill<T>.customFile = customFile;
+            get => Create(section, defaultValue)[key];
+            set => Create(section, defaultValue)[key] = value;
         }
 
-        public T this[string key, T defaultValue ]
+        public T this[string key, T defaultValue]
+        {
+            get
+            {
+                if (!KeyList.ContainsKey(key))
+                    Add(key, defaultValue);
+                return KeyList[key].Value;
+            }
+            set
+            {
+                if (!KeyList.ContainsKey(key))
+                    Add(key, defaultValue);
+                KeyList[key].Value = value;
+            }
+        }
+
+
+        public T this[string key]
         {
             get
             {
@@ -281,7 +340,7 @@ namespace COM3D2.Lilly.Plugin.Utill
             set => KeyList.ElementAt(key).Value.Value = value;
         }
 
-        public void Add(List<string> kyes, T defaultValue )
+        public void Add(List<string> kyes, T defaultValue)
         {
             //MyLog.LogMessage("ConfigEntryUtill.Awake", section, kyes.Count);
             foreach (var item in kyes)
@@ -295,7 +354,7 @@ namespace COM3D2.Lilly.Plugin.Utill
             //MyLog.LogMessage("ConfigEntryUtill.Awake", section, KeyList.Count);
         }
 
-        public void Add(string key, T  defaultValue , string description = null)
+        public void Add(string key, T defaultValue, string description = null)
         {
             KeyList.Add(
                 key,

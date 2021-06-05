@@ -20,6 +20,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
     {
         public static ConfigEntryUtill configEntryUtill;
         public static ConfigEntryUtill configEntryUtillScene;
+        public static ConfigEntryUtill<int> configEntryUtillSceneMode;
 
 
         public MaidAnmLoop()
@@ -41,11 +42,16 @@ namespace COM3D2.MaidAnmLoop.Plugin
         {
             wrapModes = Enum.GetNames(typeof(WrapMode));
             ConfigEntryUtill.init(Config);
+            ConfigEntryUtill<int>.init(Config);
             configEntryUtill = ConfigEntryUtill.Create(
                 "MaidAnmLoop"
             );
             configEntryUtillScene = ConfigEntryUtill.Create(
-                "MaidAnmLoop"
+                "MaidAnmLoopScene"
+            );
+            configEntryUtillSceneMode = ConfigEntryUtill<int>.Create(
+                "MaidAnmLoopSceneMode"
+                , 0
             );
             SystemShortcutAPI.AddButton("Lilly Plugin", new Action(delegate() { isOnGUI = !isOnGUI; }), "Lilly Plugin", ExtractResource(Properties.Resources.AnmLoop));
         }
@@ -67,6 +73,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
             scene_name = scene.name;
             if (isOn = configEntryUtillScene[scene.name, false])
             {
+                selected=configEntryUtillSceneMode[scene.name];
                 Apply();
             }
         }
@@ -91,12 +98,12 @@ namespace COM3D2.MaidAnmLoop.Plugin
 
         private void Apply()
         {
-            foreach (var item in GameMain.Instance.CharacterMgr.GetStockMaidList())
+            foreach (var maid in GameMain.Instance.CharacterMgr.GetStockMaidList())
             {
-                if (item)
+                if (maid!=null && maid.Visible)
                 {
-                    item.GetAnimation().wrapMode = wrapMode;
-                    item.GetAnimation().Play();
+                    maid.GetAnimation().wrapMode = wrapMode;
+                    //maid.GetAnimation().Play();
                 }
             }
         }
@@ -142,6 +149,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
                 if (selectedf != selected)
                 {
                     wrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapModes[selected]);
+                    configEntryUtillSceneMode[scene_name]= selected;
                     Apply();
                     selectedf = selected;
                 }
