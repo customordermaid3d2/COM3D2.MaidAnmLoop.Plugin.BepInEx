@@ -5,6 +5,11 @@ VisualStudioVersion = 16.0.30523.141
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COM3D2.MaidAnmLoop.Plugin", "COM3D2.MaidAnmLoop.Plugin\COM3D2.MaidAnmLoop.Plugin.csproj", "{9F0EB759-C7D0-4C51-B973-B805A88D550C}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{2DAD8EB0-A178-4E50-8125-A6EAC5D32A0E}"
+	ProjectSection(SolutionItems) = preProject
+		README.MD = README.MD
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -96,13 +96,14 @@ namespace COM3D2.MaidAnmLoop.Plugin
                 if (item)
                 {
                     item.GetAnimation().wrapMode = wrapMode;
+                    item.GetAnimation().Play();
                 }
             }
         }
 
         #region OnGUI
 
-        private Rect windowRect = new Rect(windowSpace, windowSpace, 200f, 400f);
+        private Rect windowRect = new Rect(windowSpace, windowSpace, 250f, 400f);
         private int windowId = new System.Random().Next();
         private const float windowSpace = 40.0f;
         private bool isOnGUI;
@@ -128,7 +129,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
         public void WindowFunction(int id)
         {
             GUI.enabled = true;
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition);
+            scrollPosition = GUILayout.BeginScrollView(scrollPosition,false,true);
 
             GUILayout.Label(scene_name);
             if (GUILayout.Button("Apply " + isOn)) { Apply(); configEntryUtillScene[scene_name, false] = isOn = !isOn; }
