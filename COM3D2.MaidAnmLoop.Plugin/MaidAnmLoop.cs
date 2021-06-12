@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
+using BepInPluginSample;
 using COM3D2.Lilly.Plugin.Utill;
 using COM3D2API;
 using UnityEngine;
@@ -22,6 +23,27 @@ namespace COM3D2.MaidAnmLoop.Plugin
         public static ConfigEntryUtill configEntryUtillScene;
         public static ConfigEntryUtill<int> configEntryUtillSceneMode;
 
+        private static ConfigEntry<BepInEx.Configuration.KeyboardShortcut> ShowCounter;
+        
+        public static MyWindowRect myWindowRect;
+        //private Rect windowRect = new Rect(windowSpace, windowSpace, 250f, 400f);
+        private int windowId = new System.Random().Next();
+        private const float windowSpace = 40.0f;
+
+        public static bool IsOpen
+        {
+            get => myWindowRect.IsOpen;
+            set => myWindowRect.IsOpen = value;
+        }
+
+        // GUI ON OFF 설정파일로 저장
+        private static ConfigEntry<bool> IsGUIOn;
+
+        public static bool isGUIOn
+        {
+            get => IsGUIOn.Value;
+            set => IsGUIOn.Value = value;
+        }
 
         public MaidAnmLoop()
         {
@@ -40,6 +62,9 @@ namespace COM3D2.MaidAnmLoop.Plugin
 
         public void Awake()
         {
+            ShowCounter = Config.Bind("GUI", "isGUIOnKey", new BepInEx.Configuration.KeyboardShortcut(KeyCode.Alpha6, KeyCode.LeftControl));
+            myWindowRect = new MyWindowRect(Config, "COM3D2.MaidAnmLoop.Plugin");
+            IsGUIOn = Config.Bind("GUI", "isGUIOn", false);
             wrapModes = Enum.GetNames(typeof(WrapMode));
             ConfigEntryUtill.init(Config);
             ConfigEntryUtill<int>.init(Config);
@@ -53,12 +78,13 @@ namespace COM3D2.MaidAnmLoop.Plugin
                 "MaidAnmLoopSceneMode"
                 , 0
             );
-            SystemShortcutAPI.AddButton("Lilly Plugin", new Action(delegate() { isOnGUI = !isOnGUI; }), "Lilly Plugin", ExtractResource(Properties.Resources.AnmLoop));
+            SystemShortcutAPI.AddButton("COM3D2.MaidAnmLoop.Plugin", new Action(delegate() { isGUIOn = !isGUIOn; }), "COM3D2.MaidAnmLoop.Plugin " + ShowCounter.Value.ToString(), ExtractResource(Properties.Resources.AnmLoop));
         }
 
         public void OnEnable()
         {
             SceneManager.sceneLoaded += this.OnSceneLoaded;
+            myWindowRect.load();
         }
 
         public void Start()
@@ -76,15 +102,12 @@ namespace COM3D2.MaidAnmLoop.Plugin
                 selected=configEntryUtillSceneMode[scene.name];
                 Apply();
             }
+            myWindowRect.save();
         }
 
         public void FixedUpdate()
         {
         }
-
-        public bool isOn;
-        public bool isRepeat;
-        public WrapMode wrapMode = WrapMode.Default;
 
         public void Update()
         {
@@ -96,11 +119,80 @@ namespace COM3D2.MaidAnmLoop.Plugin
             // 
         }
 
+
+        public void OnGUI()
+        {
+            if (!isGUIOn)
+            {
+                return;
+            }
+            myWindowRect.WindowRect = GUILayout.Window(windowId, myWindowRect.WindowRect, WindowFunction, "", GUI.skin.box);
+        }
+
+        private Vector2 scrollPosition;
+        private int selected;
+        private int selectedf;
+
+        public bool isOn;
+        public bool isRepeat;
+        public WrapMode wrapMode = WrapMode.Default;
+
+
+
+        public void WindowFunction(int id)
+        {
+            GUI.enabled = true;
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("MaidAnmLoop " + ShowCounter.Value.ToString(), GUILayout.Height(20));
+            GUILayout.FlexibleSpace();
+            if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20))) { IsOpen = !IsOpen; }
+            if (GUILayout.Button("x", GUILayout.Width(20), GUILayout.Height(20))) { isGUIOn = false; }
+            GUILayout.EndHorizontal();
+
+            if (!IsOpen)
+            {
+
+            }
+            else
+            {
+                scrollPosition = GUILayout.BeginScrollView(scrollPosition, false, true);
+
+                GUILayout.Label(scene_name);
+                if (GUILayout.Button("Apply " + isOn)) { Apply(); configEntryUtillScene[scene_name, false] = isOn = !isOn; }
+                if (GUILayout.Button("Apply Repeat" + " , " + isRepeat)) isRepeat = !isRepeat;
+
+                GUILayout.Label("Mode");
+                selected = GUILayout.SelectionGrid(selected, wrapModes, 2);
+                if (GUI.changed)
+                {
+                    if (selectedf != selected)
+                    {
+                        wrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapModes[selected]);
+                        configEntryUtillSceneMode[scene_name] = selected;
+                        Apply();
+                        selectedf = selected;
+                    }
+                }
+
+                GUILayout.Label("Auto Apply Scene");
+                foreach (var item in configEntryUtillScene)
+                {
+                    if (GUILayout.Button(item.Key + " , " + item.Value.Value)) item.Value.Value = !item.Value.Value;
+                }
+
+                GUILayout.EndScrollView();
+            }
+
+            GUI.DragWindow();
+            GUI.enabled = true;
+        }
+
         private void Apply()
         {
             foreach (var maid in GameMain.Instance.CharacterMgr.GetStockMaidList())
             {
-                if (maid!=null && maid.Visible)
+                if (maid != null && maid.Visible)
                 {
                     maid.GetAnimation().wrapMode = wrapMode;
                     //maid.GetAnimation().Play();
@@ -108,63 +200,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
             }
         }
 
-        #region OnGUI
 
-        private Rect windowRect = new Rect(windowSpace, windowSpace, 250f, 400f);
-        private int windowId = new System.Random().Next();
-        private const float windowSpace = 40.0f;
-        private bool isOnGUI;
-
-        public void OnGUI()
-        {
-            if (!isOnGUI)
-            {
-                return;
-            }
-            windowRect.x = Mathf.Clamp(windowRect.x, -windowRect.width + windowSpace, Screen.width - windowSpace);
-            windowRect.y = Mathf.Clamp(windowRect.y, -windowRect.height + windowSpace, Screen.height - windowSpace);
-            windowRect = GUILayout.Window(windowId, windowRect, WindowFunction, "MaidAnmLoop" );
-        }
-
-        #endregion
-
-
-        private Vector2 scrollPosition;
-        private int selected;
-        private int selectedf;
-
-        public void WindowFunction(int id)
-        {
-            GUI.enabled = true;
-            scrollPosition = GUILayout.BeginScrollView(scrollPosition,false,true);
-
-            GUILayout.Label(scene_name);
-            if (GUILayout.Button("Apply " + isOn)) { Apply(); configEntryUtillScene[scene_name, false] = isOn = !isOn; }
-            if (GUILayout.Button("Apply Repeat" + " , " + isRepeat)) isRepeat = !isRepeat;
-
-            GUILayout.Label("Mode");
-            selected = GUILayout.SelectionGrid(selected, wrapModes, 2);
-            if (GUI.changed)
-            {
-                if (selectedf != selected)
-                {
-                    wrapMode = (WrapMode)Enum.Parse(typeof(WrapMode), wrapModes[selected]);
-                    configEntryUtillSceneMode[scene_name]= selected;
-                    Apply();
-                    selectedf = selected;
-                }
-            }
-
-            GUILayout.Label("Auto Apply Scene");
-            foreach (var item in configEntryUtillScene)
-            {
-                if (GUILayout.Button(item.Key + " , " + item.Value.Value)) item.Value.Value = !item.Value.Value;
-            }
-
-            GUILayout.EndScrollView();
-            GUI.DragWindow();
-            GUI.enabled = true;
-        }
 
         /*
 Once	재생시간이 애니메이션 클립의 끝부분에 다다르는 경우에, 클립이 자동으로 재생을 멈추고 재생시간은 클립의 첫부분으로 리셋됩니다.
@@ -177,6 +213,7 @@ ClampForever	애니메이션을 재생합니다. 재생의 끝부분에 다다�
         public void OnDisable()
         {
             SceneManager.sceneLoaded -= this.OnSceneLoaded;
+            myWindowRect.save();
         }
 
 
