@@ -7,8 +7,12 @@ COM3D2.PhotoModeAutoLoop.Plugin 대용 베핀 플러그인
 
 # 필요한거
 
-COM3D2.API.dll   
-https://github.com/DeathWeasel1337/COM3D2_Plugins/releases/download/v3/COM3D2.API.v1.0.zip  
+- BepInEx https://github.com/BepInEx/BepInEx  
+- SybarisLoader https://github.com/BepInEx/BepInEx.SybarisLoader.Patcher  
+- UnityInjectorLoader https://github.com/BepInEx/BepInEx.UnityInjectorLoader  
+
+- COM3D2.API.dll  https://github.com/DeathWeasel1337/COM3D2_Plugins/releases/download/v3/COM3D2.API.v1.0.zip
+- LillyUtill  21.7.22 over https://github.com/customordermaid3d2/COM3D2.LillyUtill/releases  
 
 
 # 살세 설명

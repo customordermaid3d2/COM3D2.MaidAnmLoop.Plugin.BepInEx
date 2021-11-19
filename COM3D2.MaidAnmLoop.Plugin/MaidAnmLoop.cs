@@ -7,8 +7,8 @@ using System.Linq;
 using System.Text;
 using BepInEx;
 using BepInEx.Configuration;
-using BepInPluginSample;
 using COM3D2.Lilly.Plugin.Utill;
+using COM3D2.LillyUtill;
 using COM3D2API;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -17,7 +17,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
 {
     [BepInPlugin("COM3D2.MaidAnmLoop.Plugin", "COM3D2.MaidAnmLoop.Plugin", "21.6.05")]// 버전 규칙 잇음. 반드시 2~4개의 숫자구성으로 해야함. 미준수시 못읽어들임
     [BepInProcess("COM3D2x64.exe")]
-    public class MaidAnmLoop : BaseUnityPlugin, interfaceUnity
+    public class MaidAnmLoop : BaseUnityPlugin
     {
         public static ConfigEntryUtill configEntryUtill;
         public static ConfigEntryUtill configEntryUtillScene;
@@ -63,7 +63,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
         public void Awake()
         {
             ShowCounter = Config.Bind("GUI", "isGUIOnKey", new BepInEx.Configuration.KeyboardShortcut(KeyCode.Alpha6, KeyCode.LeftControl));
-            myWindowRect = new MyWindowRect(Config, "COM3D2.MaidAnmLoop.Plugin");
+            myWindowRect = new MyWindowRect(Config, "COM3D2.MaidAnmLoop.Plugin", "MaidAnmLoop", "MAL");
             IsGUIOn = Config.Bind("GUI", "isGUIOn", false);
             wrapModes = Enum.GetNames(typeof(WrapMode));
             ConfigEntryUtill.init(Config);
@@ -84,7 +84,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
         public void OnEnable()
         {
             SceneManager.sceneLoaded += this.OnSceneLoaded;
-            myWindowRect.load();
+            myWindowRect?.load();
         }
 
         public void Start()
@@ -102,7 +102,7 @@ namespace COM3D2.MaidAnmLoop.Plugin
                 selected=configEntryUtillSceneMode[scene.name];
                 Apply();
             }
-            myWindowRect.save();
+            //myWindowRect?.save();
         }
 
         public void FixedUpdate()
@@ -144,7 +144,9 @@ namespace COM3D2.MaidAnmLoop.Plugin
             GUI.enabled = true;
 
             GUILayout.BeginHorizontal();
-            GUILayout.Label("MaidAnmLoop " + ShowCounter.Value.ToString(), GUILayout.Height(20));
+            //GUILayout.Label("MaidAnmLoop " + ShowCounter.Value.ToString(), GUILayout.Height(20));
+            GUILayout.Label(myWindowRect.windowName, GUILayout.Height(20));
+
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("-", GUILayout.Width(20), GUILayout.Height(20))) { IsOpen = !IsOpen; }
             if (GUILayout.Button("x", GUILayout.Width(20), GUILayout.Height(20))) { isGUIOn = false; }
@@ -213,7 +215,7 @@ ClampForever	애니메이션을 재생합니다. 재생의 끝부분에 다다�
         public void OnDisable()
         {
             SceneManager.sceneLoaded -= this.OnSceneLoaded;
-            myWindowRect.save();
+            //myWindowRect?.save();
         }
 
 
