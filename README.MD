@@ -1,11 +1,11 @@
-# ÀÌ°Ô ¹¹Áö  
+# ì´ê²Œ ë­ì§€  
 
-COM3D2.PhotoModeAutoLoop.Plugin ´ë¿ë º£ÇÉ ÇÃ·¯±×ÀÎ  
+COM3D2.PhotoModeAutoLoop.Plugin ëŒ€ìš© ë² í•€ í”ŒëŸ¬ê·¸ì¸  
 
 ![2021-06-05 19 48 37](https://user-images.githubusercontent.com/20321215/120889391-c83eec80-c637-11eb-88df-c7f1f16ef0b2.png)
 
 
-# ÇÊ¿äÇÑ°Å
+# í•„ìš”í•œê±°
 
 - BepInEx https://github.com/BepInEx/BepInEx  
 - SybarisLoader https://github.com/BepInEx/BepInEx.SybarisLoader.Patcher  
@@ -15,11 +15,16 @@ COM3D2.PhotoModeAutoLoop.Plugin ´ë¿ë º£ÇÉ ÇÃ·¯±×ÀÎ
 - LillyUtill  21.7.22 over https://github.com/customordermaid3d2/COM3D2.LillyUtill/releases  
 
 
-# »ì¼¼ ¼³¸í
+# ì„¤ì¹˜ìœ„ì¹˜
 
-- "Apply" Å¬¸¯½Ã ÇØ´ç Àå¸é¿¡¼­ ÀÚµ¿À¸·Î Àû¿ë ¿©ºÎ ¼³Á¤  
-- "Apply Repeat" Å¬¸¯½Ã ¸Å ÇÁ·¹ÀÓ¸¶´Ù ¹İº¹ Àû¿ë ¿©ºÎ ¼³Á¤.  
-  ´Ù¸¥ ÇÃ·¯±×ÀÎÀÌ µ¤¾î¾²´Â°Í ¹æÁö  
-- "Mode" ´Â ¸ğ¼Ç ¹İº¾ Å¸ÀÔ ¼³Á¤  
-- "Auto Apply Scene"¿¡¼­´Â ÀÚµ¿ Àû¿ëµÉ Àå¸éµé ¸ñ·ÏÀÌ ¶ß°í  
-  ÇØ´ç Àå¸é ¹öÆ°Å¬¸¯½Ã Å°°í ²ô±â °¡´É  
+COM3D2\BepinEx\plugins
+
+
+# ì‚´ì„¸ ì„¤ëª…
+
+- "Apply" í´ë¦­ì‹œ í•´ë‹¹ ì¥ë©´ì—ì„œ ìë™ìœ¼ë¡œ ì ìš© ì—¬ë¶€ ì„¤ì •  
+- "Apply Repeat" í´ë¦­ì‹œ ë§¤ í”„ë ˆì„ë§ˆë‹¤ ë°˜ë³µ ì ìš© ì—¬ë¶€ ì„¤ì •.  
+  ë‹¤ë¥¸ í”ŒëŸ¬ê·¸ì¸ì´ ë®ì–´ì“°ëŠ”ê²ƒ ë°©ì§€  
+- "Mode" ëŠ” ëª¨ì…˜ ë°˜ë´… íƒ€ì… ì„¤ì •  
+- "Auto Apply Scene"ì—ì„œëŠ” ìë™ ì ìš©ë  ì¥ë©´ë“¤ ëª©ë¡ì´ ëœ¨ê³   
+  í•´ë‹¹ ì¥ë©´ ë²„íŠ¼í´ë¦­ì‹œ í‚¤ê³  ë„ê¸° ê°€ëŠ¥  
